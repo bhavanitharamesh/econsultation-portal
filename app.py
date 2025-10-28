@@ -97,3 +97,39 @@ if st.session_state.user_id:
     for r in list_comments_for_user(st.session_state.user_id):
         st.write(f"📌 {r['sector']} | Passcode: `{r['passcode']}` | {r['sentiment']}")
         st.caption(r['comment'])
+from docx import Document
+import io
+
+# --- Report Export ---
+if st.session_state.user_id:
+    st.subheader("📄 Generate Summary Report")
+    if st.button("Generate Word Report"):
+        items = list_comments_for_user(st.session_state.user_id)
+        if not items:
+            st.warning("No comments found to include in the report.")
+        else:
+            # Create Word Document
+            doc = Document()
+            doc.add_heading("E-Consultation Summary Report", level=1)
+            doc.add_paragraph(f"Generated for: {st.session_state.username}")
+            doc.add_paragraph(f"Total Comments: {len(items)}")
+
+            for i, it in enumerate(items, start=1):
+                doc.add_heading(f"Comment #{i}", level=2)
+                doc.add_paragraph(f"Sector: {it['sector']}")
+                doc.add_paragraph(f"Passcode: {it['passcode']}")
+                doc.add_paragraph(f"Comment: {it['comment']}")
+                doc.add_paragraph(f"Sentiment: {it['sentiment']}")
+                doc.add_paragraph(f"Summary: {it['comment'][:80]}...")
+
+            # Save to buffer
+            buffer = io.BytesIO()
+            doc.save(buffer)
+            buffer.seek(0)
+
+            st.download_button(
+                label="⬇️ Download Word Report",
+                data=buffer,
+                file_name="econsultation_summary.docx",
+                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            )
