@@ -14,17 +14,16 @@ st.markdown("""
 .reportview-container { background: #f7fbff; }
 .stButton>button { background-color: #0b66c3; color: white; border-radius: 8px; }
 .stDownloadButton>button { background-color: #1a7f37; color: white; border-radius: 8px; }
-h1, h2, h3 { color: #0b3d91; }
 </style>
 """, unsafe_allow_html=True)
 
 # ---------- HEADER ----------
 st.image("https://upload.wikimedia.org/wikipedia/commons/4/4f/Emblem_of_India.svg", width=60)
 st.title("🇮🇳 Ministry of Corporate Affairs — E-Consultation Portal")
-st.caption("Smart India Hackathon 2025 | AI-Based Sentiment Analysis & Feedback System")
+st.caption("Smart India Hackathon 2025 | AI-based Sentiment Analysis System")
 
 # ---------- SESSION ----------
-if "user_id" not in st.session_state:
+if 'user_id' not in st.session_state:
     st.session_state.user_id = None
     st.session_state.username = None
 
@@ -50,7 +49,7 @@ if st.session_state.user_id is None:
             if ok:
                 st.session_state.user_id = val
                 st.session_state.username = u
-                st.sidebar.success("✅ Logged in successfully!")
+                st.sidebar.success("Logged in successfully!")
             else:
                 st.sidebar.error(val)
 else:
@@ -60,11 +59,11 @@ else:
         st.session_state.username = None
         st.experimental_rerun()
 
-use_nlp = st.sidebar.checkbox("Enable full NLP models (slower but more accurate)", value=False)
+use_nlp = st.sidebar.checkbox("Enable full NLP models (slow)", value=False)
 if use_nlp:
     load_models()
 
-# ---------- MAIN SECTION ----------
+# ---------- MAIN ----------
 SECTORS = [
     "Agriculture", "Mining and quarrying", "Manufacturing", "Electricity and gas",
     "Construction", "Trade", "Transport", "Business service"
@@ -74,31 +73,29 @@ page = st.radio("Choose Action", ["Submit Comment", "Track Complaint"], horizont
 
 # ---------- SUBMIT COMMENT ----------
 if page == "Submit Comment":
-    st.subheader("📝 Submit New Comment")
+    st.subheader("Submit New Comment")
     sector = st.selectbox("Select Sector", SECTORS)
-    comment = st.text_area("Enter your comment here", height=150)
+    comment = st.text_area("Enter your comment", height=150)
 
     if st.button("Submit Comment"):
         if not comment.strip():
-            st.error("Please enter a valid comment.")
+            st.error("Please enter a valid comment")
         else:
             sentiment, score = predict_sentiment(comment, use_model=use_nlp)
             summary = summarize_text(comment, use_model=use_nlp)
             user_id = st.session_state.user_id if st.session_state.user_id else 0
             code = add_comment(user_id, sector, comment, sentiment, summary)
-
-            st.success(f"✅ Comment submitted successfully!")
-            st.info(f"Your unique Passcode: **{code}**")
-            st.write(f"**Sentiment:** {sentiment.capitalize()} | **Summary:** {summary}")
+            st.success(f"✅ Submitted successfully! Your Passcode: {code}")
+            st.info(f"Sentiment: {sentiment.capitalize()} | Summary: {summary}")
 
 # ---------- TRACK COMPLAINT ----------
 elif page == "Track Complaint":
-    st.subheader("🔍 Track Your Complaint")
+    st.subheader("Track your Complaint")
     code = st.text_input("Enter your Passcode")
     if st.button("Track Complaint"):
         rec = get_comment_by_passcode(code.strip())
         if not rec:
-            st.error("❌ No record found for this passcode.")
+            st.error("No record found!")
         else:
             st.write(f"**Sector:** {rec['sector']}")
             st.write(f"**Comment:** {rec['comment']}")
@@ -106,7 +103,7 @@ elif page == "Track Complaint":
             st.write(f"**Sentiment:** {rec['sentiment']}")
             st.write(f"**Status:** {rec['status']}")
 
-# ---------- USER SUBMISSIONS ----------
+# ---------- MY SUBMISSIONS ----------
 if st.session_state.user_id:
     st.markdown("---")
     st.subheader("📋 My Submissions")
@@ -116,14 +113,13 @@ if st.session_state.user_id:
         df = pd.DataFrame(data)
         st.dataframe(df[["sector", "comment", "sentiment", "passcode"]])
     else:
-        st.info("No submissions found yet.")
+        st.info("No submissions yet.")
 
     # ---------- WORD REPORT GENERATION ----------
     st.subheader("📄 Generate Summary Word Report")
-
     if st.button("Generate Word Report"):
         if not data:
-            st.warning("No comments available for the report.")
+            st.warning("No comments found to include in the report.")
         else:
             doc = Document()
             doc.add_heading("E-Consultation Summary Report", level=1)
@@ -137,7 +133,6 @@ if st.session_state.user_id:
                 doc.add_paragraph(f"Comment: {it['comment']}")
                 doc.add_paragraph(f"Sentiment: {it['sentiment']}")
                 doc.add_paragraph(f"Summary: {it['comment'][:100]}...")
-                doc.add_paragraph("")
 
             buffer = io.BytesIO()
             doc.save(buffer)
@@ -150,6 +145,5 @@ if st.session_state.user_id:
                 mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
             )
 
-# ---------- FOOTER ----------
 st.markdown("---")
-st.caption("Developed for Smart India Hackathon 2025 | AI-Enabled Sentiment & Feedback Analyzer | Team Codezillas 💻🇮🇳")
+st.caption("Built for Smart India Hackathon 2025 | AI-enabled Sentiment & Feedback Analysis")
