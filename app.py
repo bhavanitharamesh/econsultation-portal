@@ -37,7 +37,10 @@ if st.session_state.user_id is None:
         m = st.sidebar.text_input("Mobile (optional)")
         if st.sidebar.button("Create Account"):
             ok, msg = create_user(u, p, m)
-            st.sidebar.success(msg if ok else msg)
+            if ok:
+                st.sidebar.success(msg)
+            else:
+                st.sidebar.error(msg)
     elif action == "Login":
         u = st.sidebar.text_input("Username")
         p = st.sidebar.text_input("Password", type="password")
@@ -46,7 +49,7 @@ if st.session_state.user_id is None:
             if ok:
                 st.session_state.user_id = val
                 st.session_state.username = u
-                st.sidebar.success("Logged in")
+                st.sidebar.success("Logged in successfully!")
             else:
                 st.sidebar.error(val)
 else:
@@ -104,6 +107,7 @@ elif page == "Track Complaint":
 if st.session_state.user_id:
     st.markdown("---")
     st.subheader("📋 My Submissions")
+
     data = list_comments_for_user(st.session_state.user_id)
     if data:
         df = pd.DataFrame(data)
