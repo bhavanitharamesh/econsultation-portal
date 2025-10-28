@@ -3,3 +3,4 @@ pandas
 transformers
 torch
 werkzeug
+python-docx
