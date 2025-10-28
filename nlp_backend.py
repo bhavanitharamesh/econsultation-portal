@@ -1,7 +1,6 @@
 from transformers import pipeline
 import re
 
-# Basic keyword model fallback
 positive_words = ["good", "great", "thank", "appreciate", "resolved", "helpful"]
 negative_words = ["delay", "bad", "not working", "poor", "stop", "urgent"]
 
